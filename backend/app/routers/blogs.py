@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List
 from jose import jwt, JWTError
+from sqlalchemy.orm import joinedload
 
 from app.database import get_db
 from app.models import BlogPost, User
@@ -79,11 +80,53 @@ async def update_blog(
     await db.refresh(blog)
     return blog
 
-@router.get("/public", response_model=List[BlogResponse])
+@router.get("/public", response_model=List[dict])
 async def get_public_feed(db: AsyncSession = Depends(get_db)):
-    """
-    Publicly lists all blog articles in the database.
-    Perfect for the end-user feed page.
-    """
-    result = await db.execute(select(BlogPost).order_by(BlogPost.created_at.desc()))
-    return result.scalars().all()
+    result = await db.execute(
+        select(BlogPost)
+        .options(joinedload(BlogPost.owner))
+        .order_by(BlogPost.created_at.desc())
+    )
+    blogs = result.scalars().all()
+    
+    return [
+        {
+            "id": b.id,
+            "title": b.title,
+            "content": b.content,
+            "category": b.category,
+            "read_time": b.read_time,
+            "created_at": b.created_at,
+            "creator": {
+                "full_name": b.owner.full_name,
+                "username": b.owner.username,
+                "profile_pic": b.owner.profile_pic  # <-- ADD THIS CRITICAL LINE
+            }
+        }
+        for b in blogs
+    ]
+
+@router.get("/public/{blog_id}", response_model=dict)
+async def get_single_public_blog(blog_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(BlogPost)
+        .options(joinedload(BlogPost.owner))
+        .where(BlogPost.id == blog_id)
+    )
+    b = result.scalar_one_or_none()
+    if not b:
+        raise HTTPException(status_code=404, detail="Article not found")
+        
+    return {
+        "id": b.id,
+        "title": b.title,
+        "content": b.content,
+        "category": b.category,
+        "read_time": b.read_time,
+        "created_at": b.created_at,
+        "creator": {
+            "full_name": b.owner.full_name,
+            "username": b.owner.username,
+            "profile_pic": b.owner.profile_pic  # <-- ADD THIS CRITICAL LINE TOO
+        }
+    }

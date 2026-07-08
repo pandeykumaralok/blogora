@@ -38,7 +38,7 @@
 
     <div class="pt-4 border-t border-white/5 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="h-9 w-9 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold text-white">U</div>
+        <div id="sidebar-avatar-container" class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white uppercase text-sm">U</div>
         <div>
           <p class="text-xs font-semibold text-white">Creator Account</p>
           <button id="logout-btn" class="text-[11px] text-gray-500 hover:text-rose-400 transition-colors">Sign Out</button>
@@ -92,6 +92,25 @@
         </div>
       </section>
 
+      <section class="glass-panel p-6 rounded-2xl mb-10 max-w-md">
+        <h3 class="text-sm font-semibold mb-4 uppercase tracking-wider text-gray-400">Creator Profile Configuration</h3>
+        <div class="flex items-center space-x-6">
+          <div class="h-16 w-16 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center relative" id="settings-avatar-preview">
+            <span class="text-xs text-gray-500">None</span>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-2">Select a file from your operating system disk layer.</p>
+            
+            <input type="file" id="native-file-picker" accept="image/*" class="hidden">
+            
+            <button onclick="document.getElementById('native-file-picker').click()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-xl font-medium transition-colors flex items-center space-x-2">
+              <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+              <span>Choose From System</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section class="glass-panel p-6 rounded-2xl">
         <h3 class="text-base font-semibold text-white mb-6">Traffic & Read Dispersion Overview</h3>
         <div class="h-64">
@@ -105,8 +124,7 @@
         <h1 class="serif-title text-3xl font-medium text-white">My Published Records</h1>
         <p class="text-sm text-gray-400 mt-1">Review and audit all articles generated under your ecosystem signature.</p>
       </header>
-      <div id="blogs-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        </div>
+      <div id="blogs-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
     </div>
 
     <div id="view-create-blog" class="view-panel hidden">
@@ -163,7 +181,7 @@
   <script>
     lucide.createIcons();
     const API_BASE_URL = "http://127.0.0.1:8080/api";
-    let loadedBlogsCache = []; // Global array cache to handle local reading without extra API calls
+    let loadedBlogsCache = [];
 
     // Authentication Guard Gate
     const token = localStorage.getItem('access_token');
@@ -176,7 +194,6 @@
         window.location.href = 'auth.html?mode=login';
     });
 
-    // Navigation Subsystem Mapping Nodes
     const links = {
       dashboard: document.getElementById('nav-dashboard'),
       myBlogs: document.getElementById('nav-my-blogs'),
@@ -188,6 +205,73 @@
       myBlogs: document.getElementById('view-my-blogs'),
       createBlog: document.getElementById('view-create-blog')
     };
+
+    async function syncUserInterfaceAvatar() {
+      const tokenKey = localStorage.getItem('access_token'); 
+      if (!tokenKey) return;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/auth/me`, {
+          headers: { "Authorization": `Bearer ${tokenKey}` }
+        });
+        
+        if(res.ok) {
+          const user = await res.json();
+          
+          if(user.profile_pic) {
+            const fullImageUrl = user.profile_pic.startsWith('http') 
+                ? user.profile_pic 
+                : `http://127.0.0.1:8080${user.profile_pic}`;
+                
+            const targetHtml = `<img src="${fullImageUrl}" class="w-full h-full object-cover block rounded-full" alt="Profile pic">`;
+            
+            const previewBox = document.getElementById('settings-avatar-preview');
+            if(previewBox) {
+                previewBox.classList.remove('bg-white/5', 'flex', 'items-center', 'justify-center');
+                previewBox.innerHTML = targetHtml;
+            }
+            
+            const sidebarBox = document.getElementById('sidebar-avatar-container');
+            if(sidebarBox) {
+                sidebarBox.classList.remove('bg-indigo-600', 'flex', 'items-center', 'justify-center');
+                sidebarBox.classList.add('overflow-hidden');
+                sidebarBox.innerHTML = targetHtml;
+            }
+          }
+        }
+      } catch(e) {
+        console.error("Dashboard profile render error:", e);
+      }
+    }
+
+    // Event listener tracking system local uploads
+    document.getElementById('native-file-picker').addEventListener('change', async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/auth/update-avatar`, {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        if(!res.ok) throw new Error("Could not index file upload array signature.");
+        
+        alert("Profile photo successfully synchronized with server local disk!");
+        location.reload(); 
+      } catch(e) {
+        alert(e.message || "Failed to commit system image upload pipeline.");
+      }
+    });
+
+    // Fire check on initialization 
+    syncUserInterfaceAvatar();
 
     function switchView(activeKey) {
       Object.keys(views).forEach(key => {
@@ -201,7 +285,6 @@
           links[key].classList.add('text-gray-400');
         }
       });
-      // Reset layout configurations if switching into new clean release modes
       if (activeKey === 'createBlog' && !document.getElementById('edit-blog-id').value) {
          document.getElementById('editor-title-heading').innerText = "Forge New Material";
          document.getElementById('submit-blog-btn').innerText = "Publish Article Release";
@@ -217,7 +300,6 @@
         switchView('createBlog');
     });
 
-    // Fetch and sync blog dataset length count to statistics board
     async function fetchBlogsCount() {
       try {
         const res = await fetch(`${API_BASE_URL}/blogs/`, {
@@ -230,7 +312,6 @@
       } catch(e) {}
     }
 
-    // Load and build interactive card components from database rows
     async function loadMyBlogsData() {
       const container = document.getElementById('blogs-container');
       container.innerHTML = `<p class="text-sm text-gray-500">Loading live data stream...</p>`;
@@ -269,9 +350,9 @@
             </div>
             <div class="flex justify-between items-center border-t border-white/5 pt-3 mt-4">
               <span class="text-[11px] text-gray-500">Published: ${new Date(blog.created_at).toLocaleDateString()}</span>
-              <button onclick="openReadModal(${index})" class="text-xs font-medium text-white hover:text-indigo-400 transition-colors">
+              <a href="blog.html?id=${blog.id}" target="_blank" class="text-xs font-medium text-white hover:text-indigo-400 transition-colors">
                 Read Full →
-              </button>
+              </a>
             </div>
           `;
           container.appendChild(card);
@@ -282,7 +363,6 @@
       }
     }
 
-    // Modal Operations Subsystem
     function openReadModal(index) {
         const blog = loadedBlogsCache[index];
         document.getElementById('modal-category').innerText = blog.category;
@@ -297,7 +377,6 @@
         document.getElementById('read-modal').classList.add('hidden');
     }
 
-    // Populate editor inputs to modify existing values
     function initiateEdit(index) {
         const blog = loadedBlogsCache[index];
         document.getElementById('edit-blog-id').value = blog.id;
@@ -311,7 +390,6 @@
         switchView('createBlog');
     }
 
-    // Form Event Handler - Submitting New OR Edited Articles to the FastAPI Server
     document.getElementById('create-blog-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -323,7 +401,6 @@
         content: document.getElementById('blog-content').value
       };
 
-      // Decide dynamically if this is a fresh POST request or a PUT update route
       const method = blogId ? "PUT" : "POST";
       const targetUrl = blogId ? `${API_BASE_URL}/blogs/${blogId}` : `${API_BASE_URL}/blogs/`;
 
@@ -348,10 +425,8 @@
       }
     });
 
-    // Initial Dashboard Launch sync check
     fetchBlogsCount();
 
-    // Chart JS Configuration setup
     const ctx = document.getElementById('trafficChart').getContext('2d');
     new Chart(ctx, {
       type: 'line',

@@ -77,7 +77,11 @@
         feedCache.forEach((blog, index) => {
           const card = document.createElement('div');
           card.className = "bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col justify-between transition-all hover:border-white/20 hover:transform hover:-translate-y-0.5 cursor-pointer";
-          card.setAttribute('onclick', `openPublicModal(${index})`);
+          // card.setAttribute('onclick', `openPublicModal(${index})`);
+          card.addEventListener('click', () => {
+              window.location.href = `blog.html?id=${blog.id}`;
+          });
+
           card.innerHTML = `
             <div>
               <div class="flex items-center space-x-2 mb-3 text-[11px]">

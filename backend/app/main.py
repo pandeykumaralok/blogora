@@ -9,6 +9,8 @@ from app.routers import auth, blogs
 
 app = FastAPI(title=settings.PROJECT_NAME, version="1.0.0")
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -53,32 +55,6 @@ if os.path.exists(FRONTEND_DIR):
     async def serve_feed():
         return FileResponse(os.path.join(FRONTEND_DIR, "feed.html"))
 
-# from fastapi import FastAPI
-# from fastapi.middleware.cors import CORSMiddleware
-# from app.config import settings
-# from app.database import engine, Base
-# from app.routers import auth
-
-# app = FastAPI(title=settings.PROJECT_NAME, version="1.0.0")
-
-# # Setup CORS Policy configuration mapping your local web servers cleanly
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],  # Swap out explicitly with production domains later
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-# @app.on_event("startup")
-# async def startup():
-#     # Structural DB Core Schema Initialization
-#     async with engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.create_all)
-
-# # Append Mounted Subsystem Routers
-# app.include_router(auth.router, prefix="/api")
-
-# @app.get("/api/health", tags=["System System Diagnostic Check"])
-# def health_check():
-#     return {"status": "operational", "engine": "Aura Premium Platform Service"}
+    @app.get("/blog.html")
+    async def serve_blog_page():
+        return FileResponse(os.path.join(FRONTEND_DIR, "blog.html"))
