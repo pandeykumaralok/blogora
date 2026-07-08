@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura — Premium Editorial Feed</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#080b11] min-h-screen flex flex-col justify-between text-white">
+
+  <nav class="border-b border-white/5 bg-[#080b11]/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="h-8 w-8 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+          <span class="font-bold text-white text-sm">A</span>
+        </div>
+        <span class="text-lg font-semibold tracking-wide">aura</span>
+      </div>
+      
+      <a href="auth.html?mode=login" class="text-xs font-medium bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-gray-300 hover:text-white hover:border-white/20 transition-all">
+        Creator Studio
+      </a>
+    </div>
+  </nav>
+
+  <main class="flex-1 max-w-5xl w-full mx-auto px-6 py-12">
+    <header class="mb-12 border-b border-white/5 pb-8">
+      <h1 class="text-4xl font-semibold tracking-tight text-white mb-3">The Architectural Index</h1>
+      <p class="text-sm text-gray-400 max-w-xl leading-relaxed">Gathered perspectives on minimal design systems, modern database engineering, and fluid development interfaces.</p>
+    </header>
+
+    <div id="public-feed-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <p class="text-sm text-gray-500 col-span-3">Streaming published database articles...</p>
+    </div>
+  </main>
+
+  <div id="public-read-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-[#0f131a] border border-white/10 w-full max-w-2xl rounded-2xl p-8 max-h-[85vh] overflow-y-auto relative text-white shadow-2xl">
+      <button onclick="closePublicModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+      <div class="flex items-center space-x-2 mb-4">
+        <span id="modal-category" class="text-xs font-semibold uppercase tracking-wider text-indigo-400"></span>
+        <span class="text-gray-600 text-xs">•</span>
+        <span id="modal-readtime" class="text-xs text-gray-400"></span>
+      </div>
+      <h2 id="modal-title" class="text-2xl font-bold mb-6 leading-snug"></h2>
+      <p id="modal-content" class="text-gray-300 font-light leading-relaxed whitespace-pre-wrap text-sm"></p>
+    </div>
+  </div>
+
+  <footer class="border-t border-white/5 py-6 text-center text-xs text-gray-600">
+    &copy; 2026 Aura Systems Inc. All creative distribution rights reserved.
+  </footer>
+
+  <script>
+    lucide.createIcons();
+    const API_BASE_URL = "http://127.0.0.1:8080/api";
+    let feedCache = [];
+
+    // Automatically load all stories from the public database endpoint on boot up
+    async function fetchPublicFeed() {
+      const container = document.getElementById('public-feed-container');
+      try {
+        const response = await fetch(`${API_BASE_URL}/blogs/public`);
+        if (!response.ok) throw new Error();
+        feedCache = await response.json();
+
+        if(feedCache.length === 0) {
+          container.innerHTML = `<p class="text-sm text-gray-500 col-span-3 py-12 text-center">The editorial matrix is currently empty. Check back shortly!</p>`;
+          return;
+        }
+
+        container.innerHTML = '';
+        feedCache.forEach((blog, index) => {
+          const card = document.createElement('div');
+          card.className = "bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col justify-between transition-all hover:border-white/20 hover:transform hover:-translate-y-0.5 cursor-pointer";
+          card.setAttribute('onclick', `openPublicModal(${index})`);
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center space-x-2 mb-3 text-[11px]">
+                <span class="font-semibold uppercase text-indigo-400">${blog.category}</span>
+                <span class="text-gray-600">•</span>
+                <span class="text-gray-400">${blog.read_time}</span>
+              </div>
+              <h3 class="text-lg font-semibold text-white mb-2 leading-snug line-clamp-2">${blog.title}</h3>
+              <p class="text-gray-400 text-xs font-light line-clamp-3 mb-4 leading-relaxed">${blog.content}</p>
+            </div>
+            <div class="text-[10px] text-gray-500 border-t border-white/5 pt-3 mt-4">
+              Published ${new Date(blog.created_at).toLocaleDateString()}
+            </div>
+          `;
+          container.appendChild(card);
+        });
+        lucide.createIcons();
+      } catch (err) {
+        container.innerHTML = `<p class="text-sm text-rose-400 col-span-3 text-center py-12">Unable to bridge communication with the index database feed.</p>`;
+      }
+    }
+
+    function openPublicModal(index) {
+      const blog = feedCache[index];
+      document.getElementById('modal-category').innerText = blog.category;
+      document.getElementById('modal-readtime').innerText = blog.read_time;
+      document.getElementById('modal-title').innerText = blog.title;
+      document.getElementById('modal-content').innerText = blog.content;
+      document.getElementById('public-read-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closePublicModal() {
+      document.getElementById('public-read-modal').classList.add('hidden');
+    }
+
+    // Initialize content query download immediately
+    fetchPublicFeed();
+  </script>
+</body>
+</html>

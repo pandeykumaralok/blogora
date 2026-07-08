@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Aura</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="flex min-h-screen bg-[#080b11]">
+
+  <aside class="w-64 glass-panel border-r border-white/5 p-6 flex flex-col justify-between fixed h-full z-30">
+    <div class="space-y-8">
+      <div class="flex items-center space-x-2">
+        <div class="h-8 w-8 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
+          <span class="font-bold text-white text-sm">A</span>
+        </div>
+        <span class="text-lg font-semibold tracking-wide text-white">aura</span>
+      </div>
+
+      <nav class="space-y-1">
+        <button id="nav-dashboard" class="w-full flex items-center space-x-3 bg-white/5 text-white px-4 py-3 rounded-xl text-sm font-medium transition-all">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-indigo-400"></i>
+          <span>Dashboard</span>
+        </button>
+        <button id="nav-my-blogs" class="w-full flex items-center space-x-3 text-gray-400 hover:bg-white/5 hover:text-white px-4 py-3 rounded-xl text-sm font-medium transition-all">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          <span>My Blogs</span>
+        </button>
+        <button id="nav-create-blog" class="w-full flex items-center space-x-3 text-gray-400 hover:bg-white/5 hover:text-white px-4 py-3 rounded-xl text-sm font-medium transition-all">
+          <i data-lucide="pen-tool" class="w-4 h-4"></i>
+          <span>Create Blog</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="h-9 w-9 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold text-white">U</div>
+        <div>
+          <p class="text-xs font-semibold text-white">Creator Account</p>
+          <button id="logout-btn" class="text-[11px] text-gray-500 hover:text-rose-400 transition-colors">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="flex-1 ml-64 p-10">
+    
+    <div id="view-dashboard" class="view-panel">
+      <header class="flex justify-between items-center mb-10">
+        <div>
+          <h1 class="serif-title text-3xl font-medium text-white">Welcome back, Writer</h1>
+          <p class="text-sm text-gray-400 mt-1">Here is how your insights metrics are performing this month.</p>
+        </div>
+      </header>
+
+      <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <div class="glass-panel p-6 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Total Views</span>
+            <i data-lucide="eye" class="w-4 h-4 text-indigo-400"></i>
+          </div>
+          <p class="text-3xl font-bold text-white">142.8K</p>
+          <p class="text-xs text-emerald-400 mt-1 font-medium">↑ 12.4% vs last week</p>
+        </div>
+        <div class="glass-panel p-6 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Published Articles</span>
+            <i data-lucide="check-circle" class="w-4 h-4 text-purple-400"></i>
+          </div>
+          <p id="stats-blog-count" class="text-3xl font-bold text-white">0</p>
+          <p class="text-xs text-gray-500 mt-1 font-medium">Synced Live</p>
+        </div>
+        <div class="glass-panel p-6 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Comments Given</span>
+            <i data-lucide="message-square" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+          <p class="text-3xl font-bold text-white">1,894</p>
+          <p class="text-xs text-emerald-400 mt-1 font-medium">↑ 4.1% interaction rate</p>
+        </div>
+        <div class="glass-panel p-6 rounded-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Sponsor Earnings</span>
+            <i data-lucide="dollar-sign" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <p class="text-3xl font-bold text-white">$1,450</p>
+          <p class="text-xs text-indigo-400 mt-1 font-medium">Premium Tier Enabled</p>
+        </div>
+      </section>
+
+      <section class="glass-panel p-6 rounded-2xl">
+        <h3 class="text-base font-semibold text-white mb-6">Traffic & Read Dispersion Overview</h3>
+        <div class="h-64">
+          <canvas id="trafficChart"></canvas>
+        </div>
+      </section>
+    </div>
+
+    <div id="view-my-blogs" class="view-panel hidden">
+      <header class="mb-8">
+        <h1 class="serif-title text-3xl font-medium text-white">My Published Records</h1>
+        <p class="text-sm text-gray-400 mt-1">Review and audit all articles generated under your ecosystem signature.</p>
+      </header>
+      <div id="blogs-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        </div>
+    </div>
+
+    <div id="view-create-blog" class="view-panel hidden">
+      <header class="mb-8">
+        <h1 class="serif-title text-3xl font-medium text-white" id="editor-title-heading">Forge New Material</h1>
+        <p class="text-sm text-gray-400 mt-1">Publish premium articles directly onto the global index engine instantly.</p>
+      </header>
+
+      <div class="max-w-2xl glass-panel p-8 rounded-2xl shadow-xl">
+        <form id="create-blog-form" class="space-y-6">
+          <input type="hidden" id="edit-blog-id" value="">
+          <div>
+            <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Article Title</label>
+            <input type="text" id="blog-title" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors" placeholder="The Architecture of Luxury Design...">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Category Segment</label>
+              <input type="text" id="blog-category" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors" placeholder="AI / Design">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Estimated Read Time</label>
+              <input type="text" id="blog-readtime" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors" placeholder="5 min read">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Editorial Content Body</label>
+            <textarea id="blog-content" required rows="8" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors resize-none" placeholder="Draft your content metrics sequence directly here..."></textarea>
+          </div>
+          <button type="submit" id="submit-blog-btn" class="w-full bg-white text-gray-900 py-3.5 rounded-xl font-semibold text-sm hover:bg-gray-100 transition-all transform active:scale-[0.98]">
+            Publish Article Release
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="read-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-[#0f131a] border border-white/10 w-full max-w-2xl rounded-2xl p-8 max-h-[85vh] overflow-y-auto relative">
+      <button onclick="closeReadModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+      <div class="flex items-center space-x-2 mb-4">
+        <span id="modal-category" class="text-xs font-semibold uppercase tracking-wider text-indigo-400"></span>
+        <span class="text-gray-600 text-xs">•</span>
+        <span id="modal-readtime" class="text-xs text-gray-400"></span>
+      </div>
+      <h2 id="modal-title" class="text-2xl font-bold text-white mb-6"></h2>
+      <p id="modal-content" class="text-gray-300 font-light leading-relaxed whitespace-pre-wrap text-sm"></p>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+    const API_BASE_URL = "http://127.0.0.1:8080/api";
+    let loadedBlogsCache = []; // Global array cache to handle local reading without extra API calls
+
+    // Authentication Guard Gate
+    const token = localStorage.getItem('access_token');
+    if(!token) {
+        window.location.href = 'auth.html?mode=login';
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = 'auth.html?mode=login';
+    });
+
+    // Navigation Subsystem Mapping Nodes
+    const links = {
+      dashboard: document.getElementById('nav-dashboard'),
+      myBlogs: document.getElementById('nav-my-blogs'),
+      createBlog: document.getElementById('nav-create-blog')
+    };
+
+    const views = {
+      dashboard: document.getElementById('view-dashboard'),
+      myBlogs: document.getElementById('view-my-blogs'),
+      createBlog: document.getElementById('view-create-blog')
+    };
+
+    function switchView(activeKey) {
+      Object.keys(views).forEach(key => {
+        if(key === activeKey) {
+          views[key].classList.remove('hidden');
+          links[key].classList.add('bg-white/5', 'text-white');
+          links[key].classList.remove('text-gray-400');
+        } else {
+          views[key].classList.add('hidden');
+          links[key].classList.remove('bg-white/5', 'text-white');
+          links[key].classList.add('text-gray-400');
+        }
+      });
+      // Reset layout configurations if switching into new clean release modes
+      if (activeKey === 'createBlog' && !document.getElementById('edit-blog-id').value) {
+         document.getElementById('editor-title-heading').innerText = "Forge New Material";
+         document.getElementById('submit-blog-btn').innerText = "Publish Article Release";
+      }
+      lucide.createIcons();
+    }
+
+    links.dashboard.addEventListener('click', () => { switchView('dashboard'); fetchBlogsCount(); });
+    links.myBlogs.addEventListener('click', () => { switchView('myBlogs'); loadMyBlogsData(); });
+    links.createBlog.addEventListener('click', () => {
+        document.getElementById('create-blog-form').reset();
+        document.getElementById('edit-blog-id').value = "";
+        switchView('createBlog');
+    });
+
+    // Fetch and sync blog dataset length count to statistics board
+    async function fetchBlogsCount() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/blogs/`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if(res.ok) {
+          const data = await res.json();
+          document.getElementById('stats-blog-count').innerText = data.length || 0;
+        }
+      } catch(e) {}
+    }
+
+    // Load and build interactive card components from database rows
+    async function loadMyBlogsData() {
+      const container = document.getElementById('blogs-container');
+      container.innerHTML = `<p class="text-sm text-gray-500">Loading live data stream...</p>`;
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/blogs/`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if(!response.ok) throw new Error();
+        loadedBlogsCache = await response.json();
+        
+        if(loadedBlogsCache.length === 0) {
+          container.innerHTML = `<p class="text-sm text-gray-500 col-span-2">No articles written yet. Launch the editor forge panel to begin.</p>`;
+          return;
+        }
+        
+        container.innerHTML = '';
+        loadedBlogsCache.forEach((blog, index) => {
+          const card = document.createElement('div');
+          card.className = "glass-panel p-6 rounded-2xl flex flex-col justify-between transition-all hover:border-white/20";
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">${blog.category}</span>
+                  <span class="text-gray-600 text-xs">•</span>
+                  <span class="text-xs text-gray-400">${blog.read_time}</span>
+                </div>
+                <button onclick="initiateEdit(${index})" class="text-gray-500 hover:text-indigo-400 transition-colors text-xs flex items-center space-x-1">
+                   <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                   <span>Edit</span>
+                </button>
+              </div>
+              <h3 class="text-xl font-semibold text-white mb-2 leading-snug">${blog.title}</h3>
+              <p class="text-gray-400 text-sm font-light line-clamp-3 mb-4">${blog.content}</p>
+            </div>
+            <div class="flex justify-between items-center border-t border-white/5 pt-3 mt-4">
+              <span class="text-[11px] text-gray-500">Published: ${new Date(blog.created_at).toLocaleDateString()}</span>
+              <button onclick="openReadModal(${index})" class="text-xs font-medium text-white hover:text-indigo-400 transition-colors">
+                Read Full →
+              </button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+        lucide.createIcons();
+      } catch (err) {
+        container.innerHTML = `<p class="text-sm text-rose-400 col-span-2">Failed to poll database contents cleanly.</p>`;
+      }
+    }
+
+    // Modal Operations Subsystem
+    function openReadModal(index) {
+        const blog = loadedBlogsCache[index];
+        document.getElementById('modal-category').innerText = blog.category;
+        document.getElementById('modal-readtime').innerText = blog.read_time;
+        document.getElementById('modal-title').innerText = blog.title;
+        document.getElementById('modal-content').innerText = blog.content;
+        document.getElementById('read-modal').classList.remove('hidden');
+        lucide.createIcons();
+    }
+    
+    function closeReadModal() {
+        document.getElementById('read-modal').classList.add('hidden');
+    }
+
+    // Populate editor inputs to modify existing values
+    function initiateEdit(index) {
+        const blog = loadedBlogsCache[index];
+        document.getElementById('edit-blog-id').value = blog.id;
+        document.getElementById('blog-title').value = blog.title;
+        document.getElementById('blog-category').value = blog.category;
+        document.getElementById('blog-readtime').value = blog.read_time;
+        document.getElementById('blog-content').value = blog.content;
+        
+        document.getElementById('editor-title-heading').innerText = "Edit Article Configuration";
+        document.getElementById('submit-blog-btn').innerText = "Save and Update Article";
+        switchView('createBlog');
+    }
+
+    // Form Event Handler - Submitting New OR Edited Articles to the FastAPI Server
+    document.getElementById('create-blog-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const blogId = document.getElementById('edit-blog-id').value;
+      const payload = {
+        title: document.getElementById('blog-title').value,
+        category: document.getElementById('blog-category').value,
+        read_time: document.getElementById('blog-readtime').value,
+        content: document.getElementById('blog-content').value
+      };
+
+      // Decide dynamically if this is a fresh POST request or a PUT update route
+      const method = blogId ? "PUT" : "POST";
+      const targetUrl = blogId ? `${API_BASE_URL}/blogs/${blogId}` : `${API_BASE_URL}/blogs/`;
+
+      try {
+        const response = await fetch(targetUrl, {
+          method: method,
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if(!response.ok) throw new Error("Could not process your article request on the server.");
+        
+        alert(blogId ? "Article successfully modified and updated!" : "Article successfully synchronized and posted live!");
+        document.getElementById('create-blog-form').reset();
+        document.getElementById('edit-blog-id').value = "";
+        links.myBlogs.click(); 
+      } catch(err) {
+        alert(err.message);
+      }
+    });
+
+    // Initial Dashboard Launch sync check
+    fetchBlogsCount();
+
+    // Chart JS Configuration setup
+    const ctx = document.getElementById('trafficChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+          label: 'Unique Readers',
+          data: [12000, 19000, 32000, 56000, 89000, 142800],
+          borderColor: '#6366f1',
+          borderWidth: 3,
+          backgroundColor: 'rgba(99, 102, 241, 0.05)',
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#9ca3af' } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
