@@ -30,7 +30,7 @@ echo "========================================"
 #########################################
 
 mapfile -t FILES < <(
-    find PROJECT_ROOT \
+    find "$PROJECT_ROOT" \
         -type f \
         -name "*.py" \
         ! -path "*/test/*" \
