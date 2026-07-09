@@ -1,0 +1,18 @@
+[MASTER]
+ignore=tests,test
+ignore-patterns=test_.*
+
+[MESSAGES CONTROL]
+disable=
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring
+
+[FORMAT]
+max-line-length=100
+
+[DESIGN]
+max-args=8
+
+[REPORTS]
+score = no

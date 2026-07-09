@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "feature/**"
+
+  pull_request:
+
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg USERNAME=github \
+            --build-arg UID=1001 \
+            --build-arg GID=1001 \
+            -t python-app:latest .
+
+      - name: Run pylint
+        run: |
+          docker run --rm \
+          -v "${{ github.workspace }}:/app" \
+          -w /app \
+          python-app:latest \
+          bash src/lint.sh
