@@ -3,6 +3,13 @@
 set -euo pipefail
 readonly VIOLATION_THRESHOLD=50
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "$SCRIPT_DIR"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+echo "$PROJECT_ROOT"
+
 # ANSI colors
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
@@ -23,7 +30,7 @@ echo "========================================"
 #########################################
 
 mapfile -t FILES < <(
-    find . \
+    find PROJECT_ROOT \
         -type f \
         -name "*.py" \
         ! -path "*/test/*" \
