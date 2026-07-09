@@ -18,19 +18,16 @@ ARG GID=1000
 ENV DEBIAN_FRONTEND=noninteractive
 
 #############################################
-# Install OS Packages & Python 3.12
+# Install Python 3.12 and OS Packages
 #############################################
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-        python3.12 \
-        python3.12-dev \
-        python3.12-venv \
-        python3-pip \
+        software-properties-common \
+        gnupg \
+        gpg-agent \
+        dirmngr \
+        ca-certificates \
         wget \
         curl \
         unzip \
@@ -39,8 +36,14 @@ RUN apt-get update && \
         git \
         vim \
         nano \
-        build-essential \
-        ca-certificates && \
+        build-essential && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        python3.12 \
+        python3.12-dev \
+        python3.12-venv && \
+    curl -sS https://bootstrap.pypa.io/get-pip.py | python3.12 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -68,3 +71,5 @@ RUN groupadd --gid ${GID} ${USERNAME} && \
     chown -R ${USERNAME}:${USERNAME} /app
 
 USER ${USERNAME}
+
+CMD ["/bin/bash"]
