@@ -63,15 +63,15 @@ printf '%s\n' "$OUTPUT"
 
 read FATAL ERROR WARNING REFACTOR CONVENTION < <(
     awk '
-    /: [F][0-9]{4}:/ {f++}
-    /: [E][0-9]{4}:/ {e++}
-    /: [W][0-9]{4}:/ {w++}
-    /: [R][0-9]{4}:/ {r++}
-    /: [C][0-9]{4}:/ {c++}
+    /: F[0-9][0-9][0-9][0-9]:/ {f++}
+    /: E[0-9][0-9][0-9][0-9]:/ {e++}
+    /: W[0-9][0-9][0-9][0-9]:/ {w++}
+    /: R[0-9][0-9][0-9][0-9]:/ {r++}
+    /: C[0-9][0-9][0-9][0-9]:/ {c++}
     END {
         print f+0, e+0, w+0, r+0, c+0
     }' <<< "$OUTPUT"
-)
+    )
 
 TOTAL=$((FATAL + ERROR + WARNING + REFACTOR + CONVENTION))
 echo
