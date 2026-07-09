@@ -17,11 +17,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build \
-            --build-arg USERNAME=github \
-            --build-arg UID=1001 \
-            --build-arg GID=1001 \
-            -t python-app:latest .
+          docker build -t blogora-image:1.0.0 .
 
       - name: Run pylint
         run: |
@@ -29,4 +25,4 @@ jobs:
           -v "${{ github.workspace }}:/app" \
           -w /app \
           python-app:latest \
-          bash src/lint.sh
+          bash tools/pylint.sh
