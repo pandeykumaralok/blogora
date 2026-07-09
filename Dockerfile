@@ -36,7 +36,6 @@ RUN apt-get update && \
         git \
         vim \
         nano \
-        awk \
         build-essential && \
     add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
