@@ -6,9 +6,13 @@ on:
       - "feature/**"
       - "dev"
 
+env:
+  IMAGE_NAME: blogora-image
+  IMAGE_TAG: ${{ github.run_number }}
+
 jobs:
   pylint:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
@@ -16,12 +20,35 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t blogora-image:1.0.0 .
+          docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
       - name: Run pylint
         run: |
           docker run --rm \
-          -v "${{ github.workspace }}:/app" \
-          -w /app \
-          blogora-image:1.0.0 \
-          bash tools/pylint.sh
+            -v "${{ github.workspace }}:/app" \
+            -w /app \
+            ${IMAGE_NAME}:${IMAGE_TAG} \
+            bash tools/pylint.sh
+
+      - name: Login to Nexus
+        run: |
+          echo "${{ secrets.NEXUS_PASSWORD }}" | docker login \
+            ${{ secrets.NEXUS_REGISTRY }} \
+            --username "${{ secrets.NEXUS_USERNAME }}" \
+            --password-stdin
+
+      - name: Tag Docker Image
+        run: |
+          docker tag \
+            ${IMAGE_NAME}:${IMAGE_TAG} \
+            ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:${IMAGE_TAG}
+
+      - name: Push Docker Image
+        run: |
+          docker push \
+            ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:${IMAGE_TAG}
+
+      - name: Logout from Nexus
+        if: always()
+        run: |
+          docker logout ${{ secrets.NEXUS_REGISTRY }}
