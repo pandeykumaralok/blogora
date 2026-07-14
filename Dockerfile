@@ -55,6 +55,12 @@ WORKDIR /app
 
 COPY backend/requirements.txt .
 
+# 1. Copy the backend code
+COPY backend/ ./backend/
+
+# 2. Copy the frontend static files (creates /app/frontend inside the container)
+COPY frontend/ ./frontend/
+
 RUN python3.12 -m pip install --no-cache-dir -r requirements.txt
 
 #############################################
@@ -72,4 +78,5 @@ RUN groupadd --gid ${GID} ${USERNAME} && \
 
 USER ${USERNAME}
 
-CMD ["/bin/bash"]
+# CMD ["/bin/bash"]
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8080"]
