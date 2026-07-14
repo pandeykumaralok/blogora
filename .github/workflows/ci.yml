@@ -55,6 +55,14 @@ jobs:
         if: always()
         run: |
           docker logout ${{ secrets.NEXUS_REGISTRY }}
+      
+      # Step 1: Clone your separate manifests repository
+      - name: Checkout Manifest Repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'pandeykumaralok/blogora-manifests' # Your exact manifest repo
+          token: ${{ secrets.MANIFEST_REPO_PAT }} # Uses your saved PAT for access
+          path: manifests-repo # Clones it into a sub-folder named "manifests-repo"
 
       # THIS STEP TRIGGERS THE CD BY UPDATING THE MANIFEST
       - name: Update Image Tag in Deployment Manifest
@@ -62,9 +70,13 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+          cd manifests-repo
+
           # If deployment files are in a different repo, you'd clone it here first.
           # Modifying the deployment file using sed (or yq)
-          sed -i "s|image: ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:.*|image: ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:${IMAGE_TAG}|g" deploy/deployment.yaml
+          sed -i "s|image: ***/${IMAGE_NAME}:.*|image: ***/${IMAGE_NAME}:${IMAGE_TAG}|g" deploy/deployment.yaml
+          # sed -i "s|image: ***/${IMAGE_NAME}:.*|image: ***/${IMAGE_NAME}:${IMAGE_TAG}|g" deploy/deployment.yaml
+          # sed -i "s|image: ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:.*|image: ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:${IMAGE_TAG}|g" deploy/deployment.yaml
 
           git add deploy/deployment.yaml
           git commit -m "chore: update web-app image tag to ${IMAGE_TAG} [skip ci]"
