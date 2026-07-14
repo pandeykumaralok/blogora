@@ -74,9 +74,9 @@ jobs:
 
           # If deployment files are in a different repo, you'd clone it here first.
           # Modifying the deployment file using sed (or yq)
-          sed -i "s|image: ***/${IMAGE_NAME}:.*|image: ***/${IMAGE_NAME}:${IMAGE_TAG}|g" deploy/deployment.yaml
           # sed -i "s|image: ***/${IMAGE_NAME}:.*|image: ***/${IMAGE_NAME}:${IMAGE_TAG}|g" deploy/deployment.yaml
-          # sed -i "s|image: ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:.*|image: ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:${IMAGE_TAG}|g" deploy/deployment.yaml
+          # sed -i "s|image: ***/${IMAGE_NAME}:.*|image: ***/${IMAGE_NAME}:${IMAGE_TAG}|g" deploy/deployment.yaml
+          sed -i "s|image: ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:.*|image: ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:${IMAGE_TAG}|g" deploy/deployment.yaml
 
           git add deploy/deployment.yaml
           git commit -m "chore: update web-app image tag to ${IMAGE_TAG} [skip ci]"
