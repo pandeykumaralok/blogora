@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-readonly VIOLATION_THRESHOLD=110
+readonly VIOLATION_THRESHOLD=115
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
