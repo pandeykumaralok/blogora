@@ -6,6 +6,9 @@ on:
       - "feature/**"
       - "dev"
 
+permissions:
+  contents: write
+
 env:
   IMAGE_NAME: blogora-image
   IMAGE_TAG: ${{ github.run_number }}
@@ -52,3 +55,17 @@ jobs:
         if: always()
         run: |
           docker logout ${{ secrets.NEXUS_REGISTRY }}
+
+      # THIS STEP TRIGGERS THE CD BY UPDATING THE MANIFEST
+      - name: Update Image Tag in Deployment Manifest
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # If deployment files are in a different repo, you'd clone it here first.
+          # Modifying the deployment file using sed (or yq)
+          sed -i "s|image: ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:.*|image: ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:${IMAGE_TAG}|g" deploy/deployment.yaml
+
+          git add deploy/deployment.yaml
+          git commit -m "chore: update web-app image tag to ${IMAGE_TAG} [skip ci]"
+          git push
