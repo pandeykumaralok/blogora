@@ -14,7 +14,7 @@ env:
   IMAGE_TAG: ${{ github.run_number }}
 
 jobs:
-  pylint:
+  ci:
     runs-on: self-hosted
 
     steps:
