@@ -1,20 +1,38 @@
-name: Prime Factorization
+name: Prime Factorization (Fast Chunks)
 
 on:
-  # workflow_dispatch:
   push:
 
 jobs:
+  generate-chunks:
+    runs-on: ubuntu-latest
+    outputs:
+      chunks: ${{ steps.set-matrix.outputs.chunks }}
+    steps:
+      - id: set-matrix
+        run: |
+          # Creates 100 chunks of 10,000,000 numbers each
+          CHUNKS=$(python3 -c '
+          import json
+          total = 1000000000
+          step = 10000000
+          chunks = []
+          idx = 1
+          for start in range(1, total + 1, step):
+              end = min(start + step - 1, total)
+              chunks.append({"id": idx, "start": start, "end": end})
+              idx += 1
+          print(json.dumps(chunks))
+          ')
+          echo "chunks=$CHUNKS" >> $GITHUB_OUTPUT
+
   compute-factors:
+    needs: generate-chunks
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 15 # Runs 15 jobs at once within free-tier concurrency limits
       matrix:
-        chunk:
-          - { id: 1, start: 1, end: 200000000 }
-          - { id: 2, start: 200000001, end: 400000000 }
-          - { id: 3, start: 400000001, end: 600000000 }
-          - { id: 4, start: 600000001, end: 800000000 }
-          - { id: 5, start: 800000001, end: 1000000000 }
+        chunk: ${{ json(needs.generate-chunks.outputs.chunks) }}
 
     steps:
       - name: Set up PyPy3
@@ -22,7 +40,7 @@ jobs:
         with:
           python-version: 'pypy3.10'
 
-      - name: Calculate Range in Python
+      - name: Calculate Factorization
         run: |
           cat << 'EOF' > factorize.py
           import gzip
@@ -32,15 +50,12 @@ jobs:
           def factorize(n):
               factors = []
               temp = n
-              
-              # Wheel factorization logic (trial division optimization)
               while temp % 2 == 0:
                   factors.append(2)
                   temp //= 2
               while temp % 3 == 0:
                   factors.append(3)
                   temp //= 3
-                  
               d = 5
               while d * d <= temp:
                   while temp % d == 0:
@@ -50,18 +65,13 @@ jobs:
                       factors.append(d + 2)
                       temp //= (d + 2)
                   d += 6
-                  
               if temp > 1:
                   factors.append(temp)
-                  
               return f"{n}: " + " ".join(map(str, factors)) + "\n"
 
           def process_subchunk(args):
               sub_start, sub_end = args
-              lines = []
-              for n in range(sub_start, sub_end + 1):
-                  lines.append(factorize(n))
-              return "".join(lines)
+              return "".join(factorize(n) for n in range(sub_start, sub_end + 1))
 
           if __name__ == "__main__":
               start_num = int(sys.argv[1])
@@ -69,9 +79,7 @@ jobs:
               out_file = sys.argv[3]
 
               num_workers = cpu_count()
-              batch_size = 50000  # Numbers processed per core per task batch
-              
-              # Generate sub-ranges for worker processes
+              batch_size = 20000
               tasks = []
               curr = start_num
               while curr <= end_num:
@@ -79,12 +87,10 @@ jobs:
                   tasks.append((curr, nxt))
                   curr = nxt + 1
 
-              # Process with worker pool and stream directly to compressed file
               with gzip.open(out_file, "wt", encoding="utf-8") as f:
                   with Pool(processes=num_workers) as pool:
                       for result_chunk in pool.imap(process_subchunk, tasks, chunksize=4):
                           f.write(result_chunk)
-
           EOF
 
           START=${{ matrix.chunk.start }}
@@ -111,7 +117,6 @@ jobs:
       - name: Merge Python Outputs
         run: |
           mkdir final_output
-          # Stream decompress into one combined output file
           zcat compressed_chunks/factorization-part-*/*.txt.gz > final_output/prime_factorization_1B.txt
           echo "Finished merging. Total size: $(du -sh final_output/prime_factorization_1B.txt | cut -f1)"
 
