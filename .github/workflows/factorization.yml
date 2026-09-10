@@ -32,7 +32,7 @@ jobs:
     strategy:
       max-parallel: 15 # Runs 15 jobs at once within free-tier concurrency limits
       matrix:
-        chunk: ${{ json(needs.generate-chunks.outputs.chunks) }}
+        chunk: ${{ fromJSON(needs.generate-chunks.outputs.chunks) }}
 
     steps:
       - name: Set up PyPy3
