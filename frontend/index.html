@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura — Share Ideas That Inspire The World</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="relative">
+  <div class="radial-glow top-[-200px] left-[-200px]"></div>
+  <div class="radial-glow top-[600px] right-[-200px]"></div>
+
+  <nav class="sticky top-0 z-50 glass-panel border-b px-8 py-4 flex justify-between items-center">
+    <div class="flex items-center space-x-2">
+      <div class="h-9 w-9 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+        <span class="font-bold text-white tracking-tighter">A</span>
+      </div>
+      <span class="text-xl font-semibold tracking-wide text-white">aura</span>
+    </div>
+    <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-400">
+      <a href="#" class="hover:text-white transition-colors">Platform</a>
+      <a href="#" class="hover:text-white transition-colors">Trending</a>
+      <a href="#" class="hover:text-white transition-colors">Creators</a>
+    </div>
+    <div class="flex items-center space-x-4">
+      <a href="auth.html?mode=login" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Sign In</a>
+      <a href="feed.html" class="bg-white text-gray-900 px-5 py-2 rounded-full text-sm font-semibold hover:bg-gray-100 transition-all transform active:scale-95 shadow-md">Get Started</a>
+      <!-- <a href="auth.html?mode=signup" class="bg-white text-gray-900 px-5 py-2 rounded-full text-sm font-semibold hover:bg-gray-100 transition-all transform active:scale-95 shadow-md">Get Started</a> -->
+    </div>
+  </nav>
+
+  <header class="max-w-6xl mx-auto px-6 pt-24 pb-16 text-center relative z-10">
+    <div class="inline-flex items-center space-x-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-4 py-1.5 rounded-full text-xs font-medium tracking-wide mb-6 uppercase">
+      <span>✨ Experience Premium Publishing</span>
+    </div>
+    <h1 class="serif-title text-5xl md:text-7xl font-semibold tracking-tight text-gradient leading-[1.15] mb-8">
+      Share Ideas That<br>Inspire The World
+    </h1>
+    <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
+      A beautifully structured space for deep-dives, cultural updates, creative writing, and minimalist engineering logic. 
+    </p>
+    <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+      <a href="auth.html?mode=signup" class="w-full sm:w-auto bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-8 py-4 rounded-full font-medium transition-all shadow-lg shadow-indigo-500/20 text-center">Start Writing</a>
+      <a href="#featured" class="w-full sm:w-auto glass-panel hover:bg-white/5 text-white px-8 py-4 rounded-full font-medium transition-all text-center">Explore Articles</a>
+    </div>
+  </header>
+
+  <main id="featured" class="max-w-6xl mx-auto px-6 py-16">
+    <div class="flex justify-between items-end mb-12">
+      <div>
+        <p class="text-indigo-400 text-sm font-semibold tracking-widest uppercase mb-2">Curated Stream</p>
+        <h2 class="serif-title text-3xl md:text-4xl font-medium text-white">Trending on Aura</h2>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <article class="glass-card rounded-2xl overflow-hidden flex flex-col h-full">
+        <div class="h-48 overflow-hidden bg-gray-800 relative">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+          <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80" alt="Design Art" class="w-full h-full object-cover">
+        </div>
+        <div class="p-6 flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center space-x-2 mb-3">
+              <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Technology</span>
+              <span class="text-gray-600 text-xs">•</span>
+              <span class="text-xs text-gray-400">5 min read</span>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-2 leading-snug">The Architectural Elegance of Modern Micro-Frontends</h3>
+            <p class="text-gray-400 text-sm font-light line-clamp-2 mb-4">Discover how modern interfaces combine deep styling paradigms with resilient server execution models.</p>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-white/5">
+            <div class="flex items-center space-x-3">
+              <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold text-white">HE</div>
+              <span class="text-xs font-medium text-gray-300">Helena Vance</span>
+            </div>
+            <i data-lucide="bookmark" class="w-4 h-4 text-gray-400 cursor-pointer hover:text-white transition-colors"></i>
+          </div>
+        </div>
+      </article>
+
+      <article class="glass-card rounded-2xl overflow-hidden flex flex-col h-full">
+        <div class="h-48 overflow-hidden bg-gray-800 relative">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+          <img src="https://images.unsplash.com/photo-1607799279861-4dd421887fb3?auto=format&fit=crop&w=800&q=80" alt="DevOps" class="w-full h-full object-cover">
+        </div>
+        <div class="p-6 flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center space-x-2 mb-3">
+              <span class="text-xs font-semibold uppercase tracking-wider text-purple-400">DevOps</span>
+              <span class="text-gray-600 text-xs">•</span>
+              <span class="text-xs text-gray-400">8 min read</span>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-2 leading-snug">Securing Dynamic API Nodes and Cloud Infrastructure</h3>
+            <p class="text-gray-400 text-sm font-light line-clamp-2 mb-4">A definitive technical analysis mapping performance matrix overhead across decoupled databases.</p>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-white/5">
+            <div class="flex items-center space-x-3">
+              <div class="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold text-white">MK</div>
+              <span class="text-xs font-medium text-gray-300">Marcus K.</span>
+            </div>
+            <i data-lucide="bookmark" class="w-4 h-4 text-gray-400 cursor-pointer hover:text-white transition-colors"></i>
+          </div>
+        </div>
+      </article>
+
+      <article class="glass-card rounded-2xl overflow-hidden flex flex-col h-full">
+        <div class="h-48 overflow-hidden bg-gray-800 relative">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+          <img src="https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?auto=format&fit=crop&w=800&q=80" alt="AI" class="w-full h-full object-cover">
+        </div>
+        <div class="p-6 flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center space-x-2 mb-3">
+              <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400">AI / Design</span>
+              <span class="text-gray-600 text-xs">•</span>
+              <span class="text-xs text-gray-400">4 min read</span>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-2 leading-snug">The Generative Art Frontier: Synthesized Aesthetics</h3>
+            <p class="text-gray-400 text-sm font-light line-clamp-2 mb-4">Exploring the artistic blurred boundaries between deterministic systems and human intent.</p>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-white/5">
+            <div class="flex items-center space-x-3">
+              <div class="h-8 w-8 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">AI</div>
+              <span class="text-xs font-medium text-gray-300">Aura Indigo</span>
+            </div>
+            <i data-lucide="bookmark" class="w-4 h-4 text-gray-400 cursor-pointer hover:text-white transition-colors"></i>
+          </div>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

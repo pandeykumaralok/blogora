@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading Article — Aura</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#080b11] min-h-screen flex flex-col justify-between text-white">
+
+  <nav class="border-b border-white/5 bg-[#080b11]/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="feed.html" class="text-xs text-gray-400 hover:text-white transition-colors flex items-center space-x-2">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span>Back to Feed</span>
+      </a>
+      <div class="flex items-center space-x-2">
+        <div class="h-6 w-6 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded flex items-center justify-center">
+          <span class="font-bold text-white text-xs">A</span>
+        </div>
+        <span class="text-sm font-semibold tracking-wide">aura</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="flex-1 max-w-3xl w-full mx-auto px-6 py-16">
+    <article id="article-content-area" class="hidden">
+      <header class="mb-10 border-b border-white/5 pb-8">
+        <div class="flex items-center space-x-2 mb-4 text-xs">
+          <span id="blog-category" class="font-semibold uppercase text-indigo-400 tracking-wider"></span>
+          <span class="text-gray-600">•</span>
+          <span id="blog-readtime" class="text-gray-400"></span>
+          <span class="text-gray-600">•</span>
+          <span id="blog-date" class="text-gray-400"></span>
+        </div>
+        <h1 id="blog-title" class="text-4xl font-bold tracking-tight text-white leading-tight mb-4"></h1>
+      </header>
+
+      <section id="blog-body" class="text-gray-300 font-light leading-relaxed whitespace-pre-wrap text-base mb-16">
+        </section>
+
+      <footer class="border-t border-white/5 pt-8 mt-12">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 flex items-center space-x-4 max-w-md">
+          <div class="h-12 w-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shadow-md uppercase text-sm" id="creator-avatar">
+            </div>
+          <div>
+            <p class="text-xs text-gray-400 font-medium">Written Content Crafted By</p>
+            <h4 id="creator-name" class="text-base font-semibold text-white mt-0.5"></h4>
+            <p id="creator-username" class="text-xs text-indigo-400 font-mono mt-0.5"></p>
+          </div>
+        </div>
+      </footer>
+    </article>
+
+    <div id="loading-state" class="text-center py-20 text-gray-500 text-sm">
+      Fetching article records...
+    </div>
+  </main>
+
+  <footer class="border-t border-white/5 py-6 text-center text-xs text-gray-600">
+    &copy; 2026 Aura Systems Inc. All rights reserved.
+  </footer>
+
+  <script>
+    lucide.createIcons();
+    const API_BASE_URL = "http://127.0.0.1:8080/api";
+
+    // Grab the specific Blog ID parameters out of the URL string (?id=X)
+    const urlParams = new URLSearchParams(window.location.search);
+    const blogId = urlParams.get('id');
+
+    async function loadArticle() {
+        if (!blogId) {
+            document.getElementById('loading-state').innerText = "No article identifier specified.";
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/blogs/public/${blogId}`);
+            
+            if (!response.ok) throw new Error();
+            const blog = await response.json();
+
+            // Populate standard fields
+            document.getElementById('blog-category').innerText = blog.category;
+            document.getElementById('blog-readtime').innerText = blog.read_time;
+            document.getElementById('blog-date').innerText = new Date(blog.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('blog-title').innerText = blog.title;
+            document.getElementById('blog-body').innerText = blog.content;
+            
+            // Populate Creator Info Card fields
+            document.getElementById('creator-name').innerText = blog.creator.full_name;
+            document.getElementById('creator-username').innerText = `@${blog.creator.username}`;
+            
+            // ==========================================================
+            // DYNAMIC PROFILE IMAGE HANDLING CODE HERE 👇
+            // ==========================================================
+            const avatarContainer = document.getElementById('creator-avatar');
+            
+            if (blog.creator.profile_pic && blog.creator.profile_pic.trim() !== "") {
+                // Cleanly append host port if path is relative
+                const fullImageUrl = blog.creator.profile_pic.startsWith('http') 
+                    ? blog.creator.profile_pic 
+                    : `http://127.0.0.1:8080${blog.creator.profile_pic}`;
+
+                // Turn the container into an image wrapper layout
+                avatarContainer.className = "h-12 w-12 rounded-full overflow-hidden border border-white/10 shadow-md";
+                avatarContainer.innerHTML = `<img src="${fullImageUrl}" class="w-full h-full object-cover" alt="Creator Profile Photo">`;
+            } else {
+                // Revert back to the classic initials circle design layout if empty
+                avatarContainer.className = "h-12 w-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shadow-md uppercase text-sm";
+                avatarContainer.innerHTML = blog.creator.full_name.charAt(0);
+            }
+            // ==========================================================
+
+            // Toggle UI wrappers
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('article-content-area').classList.remove('hidden');
+            lucide.createIcons();
+        } catch (err) {
+            document.getElementById('loading-state').innerText = "Failed to load the article or it does not exist.";
+            document.getElementById('loading-state').classList.add('text-rose-400');
+        }
+    }
+
+    loadArticle();
+  </script>
+</body>
+</html>

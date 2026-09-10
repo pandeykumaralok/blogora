@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "feature/**"
+      - "dev"
+
+permissions:
+  contents: write
+
+env:
+  IMAGE_NAME: blogora-image
+  IMAGE_TAG: ${{ github.run_number }}
+
+jobs:
+  ci:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+
+      - name: Run pylint
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/app" \
+            -w /app \
+            ${IMAGE_NAME}:${IMAGE_TAG} \
+            bash tools/pylint.sh
+
+      - name: Login to Nexus
+        run: |
+          echo "${{ secrets.NEXUS_PASSWORD }}" | docker login \
+            ${{ secrets.NEXUS_REGISTRY }} \
+            --username "${{ secrets.NEXUS_USERNAME }}" \
+            --password-stdin
+
+      - name: Tag Docker Image
+        run: |
+          docker tag \
+            ${IMAGE_NAME}:${IMAGE_TAG} \
+            ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:${IMAGE_TAG}
+
+      - name: Push Docker Image
+        run: |
+          docker push \
+            ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:${IMAGE_TAG}
+
+      - name: Logout from Nexus
+        if: always()
+        run: |
+          docker logout ${{ secrets.NEXUS_REGISTRY }}
+      
+      # Step 1: Clone your separate manifests repository
+      - name: Checkout Manifest Repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'pandeykumaralok/blogora-manifests' # Your exact manifest repo
+          token: ${{ secrets.MANIFEST_REPO_PAT }} # Uses your saved PAT for access
+          path: manifests-repo # Clones it into a sub-folder named "manifests-repo"
+
+      # THIS STEP TRIGGERS THE CD BY UPDATING THE MANIFEST
+      - name: Update Image Tag in Deployment Manifest
+        run: |
+          cd manifests-repo
+
+          # 1. Flexible regex to match 'image:', any whitespace, any registry prefix, our image name, and the old tag
+          sed -i "s|image:[[:space:]]*.*${IMAGE_NAME}:.*|image: ${{ secrets.NEXUS_REGISTRY }}/${IMAGE_NAME}:${IMAGE_TAG}|g" deploy/deployment.yaml
+
+          # 2. Only attempt to commit if git status shows changes
+          if [ -n "$(git status --porcelain)" ]; then
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+            git add deploy/deployment.yaml
+            git commit -m "chore: update web-app image tag to ${IMAGE_TAG} [skip ci]"
+            git push
+          else
+            echo "No changes detected. The deployment manifest is already up to date with tag ${IMAGE_TAG}."
+          fi
