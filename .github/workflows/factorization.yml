@@ -9,11 +9,11 @@ jobs:
     strategy:
       matrix:
         chunk:
-          - { id: 1, start: 1, end: 200000000 }
-          - { id: 2, start: 200000001, end: 400000000 }
-          - { id: 3, start: 400000001, end: 600000000 }
-          - { id: 4, start: 600000001, end: 800000000 }
-          - { id: 5, start: 800000001, end: 1000000000 }
+          - { id: 1, start: 1, end: 200 }
+          - { id: 2, start: 201, end: 400 }
+          - { id: 3, start: 401, end: 600 }
+          - { id: 4, start: 601, end: 800 }
+          - { id: 5, start: 801, end: 1000 }
 
     steps:
       - name: Set up PyPy3
